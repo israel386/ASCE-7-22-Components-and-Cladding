@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cladding Calculator</title>
+</head>
+
+<body>
+    <h1>ASCE 7-22 Cladding Calculator</h1>
+
+    <form id="claddingForm">
+
+        <h2>Roof Zone 1, 2, and 3 & Wall Zone 4 and 5</h2>
+        <label for="windSpeed">Ultimate Wind Speed (mph):</label>
+        <input type="number" id="windSpeed" required>
+        <br>
+
+        <label for="height"> Leg Height of Structure (ft):</label>
+        <input type="number" id="height" required>
+        <br>
+
+        <label for="width">Width of Structure (ft):</label>
+        <input type="number" id="width" required>
+        <br>
+
+        <label for="Exposure">Exposure</label>
+        <select id="Exposure">
+            <option value="0.7">B</option>
+            <option value="0.98">C</option>
+            <option value="1.16">D</option>
+        </select>
+        <br>
+
+        <label for="internalPressureCoe">Internal Pressure Coefficient</label>
+        <select id="internalPressureCoe">
+            <option value="0.18">Enclosed Building</option>
+            <option value="0.55">Partially Enclosed Bulding</option>
+            <option value="0.18">Partially Open Building</option>
+        </select>
+        <br>
+
+        <button type="button" onclick="calculateCladding()">Calculate</button>
+    </form>
+
+    <h2>Results</h2>
+    <p id="resultOne"></p>
+    <p id="resultTwo"></p>
+    <p id="resultThree"></p>
+    <p id="resultFour"></p>
+    <p id="resultFive"></p>
+
+
+    <script>
+        function calculateCladding() {
+            const windSpeed = parseFloat(document.getElementById('windSpeed').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const Exposure = parseFloat(document.getElementById('Exposure').value);
+            const internalPressureCoe = parseFloat(document.getElementById('internalPressureCoe').value);
+            const width = parseFloat(document.getElementById('width').value);
+            const meanHeight = width / 2 * 3 / 12 + height
+            const affectedArea = width / 2 * 3
+
+            const Qz = 0.00256 * Exposure * 1.0 * 1.0 * windSpeed * windSpeed * 0.6
+            console.log('q: ', Qz)
+
+            let GCpZoneOnePositive;
+            let GCpZoneTwoPositive;
+            let GCpZoneThreePositive;
+            if (affectedArea <= 10) {
+                GCpZoneOnePositive = 0.6;
+                GCpZoneTwoPositive = 0.6;
+                GCpZoneThreePositive = 0.6;
+            } else if (affectedArea > 10 && affectedArea <= 200) {
+                GCpZoneOnePositive = 0.8306 - 0.2306 * Math.log10(affectedArea);
+                GCpZoneTwoPositive = 0.8306 - 0.2306 * Math.log10(affectedArea);
+                GCpZoneThreePositive = 0.8306 - 0.2306 * Math.log10(affectedArea);
+            } else {
+                GCpZoneOnePositive = 0.3;
+                GCpZoneTwoPositive = 0.3;
+                GCpZoneThreePositive = 0.3;
+            }
+
+            let GCpZoneFourPositive;
+            let GCpZoneFivePositive;
+            if (affectedArea <= 10) {
+                GCpZoneFourPositive = 1.0;
+                GCpZoneFivePositive = 1.0;
+            } else if (affectedArea > 10 && affectedArea <= 500) {
+                GCpZoneFourPositive = 1.1766 - 0.1766 * Math.log10(affectedArea);
+                GCpZoneFivePositive = 1.1766 - 0.1766 * Math.log10(affectedArea);
+            } else {
+                GCpZoneFourPositive = 0.7;
+                GCpZoneFivePositive = 0.7;
+            }
+
+
+            console.log('GCp-1P: ', GCpZoneOnePositive)
+            console.log('GCp-2P: ', GCpZoneTwoPositive)
+            console.log('GCp-3P: ', GCpZoneThreePositive)
+            console.log('GCp-4P: ', GCpZoneFourPositive)
+            console.log('GCp-5P: ', GCpZoneFivePositive)
+
+
+            let GCpZoneOneNegative;
+            if (affectedArea <= 10) {
+                GCpZoneOneNegative = -2.0;
+            } else if (affectedArea > 10 && affectedArea <= 300) {
+                GCpZoneOneNegative = -3.0155 + 1.0155 * Math.log10(affectedArea);
+            } else {
+                GCpZoneOneNegative = -0.5;
+            }
+
+            let GCpZoneTwoNegative;
+            if (affectedArea <= 10) {
+                GCpZoneTwoNegative = -2.7;
+
+
+            } else if (affectedArea > 10 && affectedArea <= 200) {
+                GCpZoneTwoNegative = -4.0067 + 1.3066 * Math.log10(affectedArea);
+
+            } else {
+                GCpZoneTwoNegative = -1.0;
+            }
+
+            let GCpZoneThreeNegative;
+            if (affectedArea <= 10) {
+                GCpZoneThreeNegative = -3.6;
+            } else if (affectedArea > 10 && affectedArea <= 100) {
+                GCpZoneThreeNegative = -5.400 + 1.800 * Math.log10(affectedArea);
+            } else {
+                GCpZoneThreeNegative = -1.8;
+            }
+
+            let GCpZoneFourNegative;
+            let GCpZoneFiveNegative;
+            if (affectedArea <= 10) {
+                GCpZoneFourNegative = -1.1;
+                GCpZoneFiveNegative = -1.4;
+            } else if (affectedArea > 10 && affectedArea <= 500) {
+                GCpZoneFourNegative = -1.2766 + 0.1766 * Math.log10(affectedArea);
+                GCpZoneFiveNegative = -1.7532 + 0.3532 * Math.log10(affectedArea);
+            } else {
+                GCpZoneFourNegative = -0.8;
+                GCpZoneFiveNegative = -0.8;
+            }
+
+            console.log('GCp-1N: ', GCpZoneOneNegative)
+            console.log('GCp-2N: ', GCpZoneTwoNegative)
+            console.log('GCp-3N: ', GCpZoneThreeNegative)
+            console.log('GCp-4N: ', GCpZoneFourNegative)
+            console.log('GCp-5N: ', GCpZoneFiveNegative)
+
+            const thresholdValueP = 16.00;
+            const thresholdValueN = -16.00;
+
+
+            const windForceZoneOnePositive = Qz * 0.85 * (GCpZoneOnePositive - internalPressureCoe);
+            const windForceZoneTwoPositive = Qz * 0.85 * (GCpZoneTwoPositive - internalPressureCoe);
+            const windForceZoneThreePositive = Qz * 0.85 * (GCpZoneThreePositive - internalPressureCoe);
+            const windForceZoneFourPositive = Qz * 0.85 * (GCpZoneFourPositive - internalPressureCoe);
+            const windForceZoneFivePositive = Qz * 0.85 * (GCpZoneFivePositive - internalPressureCoe);
+
+            const windForceZoneOneNegative = Qz * 0.85 * (GCpZoneOneNegative + internalPressureCoe);
+            const windForceZoneTwoNegative = Qz * 0.85 * (GCpZoneTwoNegative + internalPressureCoe);
+            const windForceZoneThreeNegative = Qz * 0.85 * (GCpZoneThreeNegative + internalPressureCoe);
+            const windForceZoneFourNegative = Qz * 0.85 * (GCpZoneFourNegative + internalPressureCoe);
+            const windForceZoneFiveNegative = Qz * 0.85 * (GCpZoneFiveNegative + internalPressureCoe);
+
+            console.log(windForceZoneOnePositive)
+            console.log(windForceZoneTwoPositive)
+            console.log(windForceZoneThreePositive)
+            console.log(windForceZoneFourPositive)
+            console.log(windForceZoneFivePositive)
+            console.log(windForceZoneOneNegative)
+            console.log(windForceZoneTwoNegative)
+            console.log(windForceZoneThreeNegative)
+            console.log(windForceZoneFourNegative)
+            console.log(windForceZoneFiveNegative)
+
+            const adjustedWindForceZoneOnePositive = windForceZoneOnePositive < thresholdValueP ? thresholdValueP : windForceZoneOnePositive;
+            const adjustedWindForceZoneTwoPositive = windForceZoneTwoPositive < thresholdValueP ? thresholdValueP : windForceZoneTwoPositive;
+            const adjustedWindForceZoneThreePositive = windForceZoneThreePositive < thresholdValueP ? thresholdValueP : windForceZoneThreePositive;
+            const adjustedWindForceZoneFourPositive = windForceZoneFourPositive < thresholdValueP ? thresholdValueP : windForceZoneFourPositive;
+            const adjustedWindForceZoneFivePositive = windForceZoneFivePositive < thresholdValueP ? thresholdValueP : windForceZoneFivePositive;
+
+            const adjustedWindForceZoneOneNegative = windForceZoneOneNegative > thresholdValueN ? thresholdValueN : windForceZoneOneNegative;
+            const adjustedWindForceZoneTwoNegative = windForceZoneTwoNegative > thresholdValueN ? thresholdValueN : windForceZoneTwoNegative;
+            const adjustedWindForceZoneThreeNegative = windForceZoneThreeNegative > thresholdValueN ? thresholdValueN : windForceZoneThreeNegative;
+            const adjustedWindForceZoneFourNegative = windForceZoneFourNegative > thresholdValueN ? thresholdValueN : windForceZoneFourNegative;
+            const adjustedWindForceZoneFiveNegative = windForceZoneFiveNegative > thresholdValueN ? thresholdValueN : windForceZoneFiveNegative;
+
+
+            // Display Results
+            const resultOneElement = document.getElementById('resultOne');
+            resultOneElement.innerHTML = `Roof Zone 1: +${adjustedWindForceZoneOnePositive.toFixed(2)}/${adjustedWindForceZoneOneNegative.toFixed(2)}`;
+
+            const resultTwoElement = document.getElementById('resultTwo');
+            resultTwoElement.innerHTML = `Roof Zone 2: +${adjustedWindForceZoneTwoPositive.toFixed(2)}/${adjustedWindForceZoneTwoNegative.toFixed(2)}`;
+
+            const resultThreeElement = document.getElementById('resultThree');
+            resultThreeElement.innerHTML = `Roof Zone 3: +${adjustedWindForceZoneThreePositive.toFixed(2)}/${adjustedWindForceZoneThreeNegative.toFixed(2)}`;
+
+            const resultFourElement = document.getElementById('resultFour');
+            resultFourElement.innerHTML = `Wall Zone 4: +${adjustedWindForceZoneFourPositive.toFixed(2)}/${adjustedWindForceZoneFourNegative.toFixed(2)}`;
+
+            const resultFiveElement = document.getElementById('resultFive');
+            resultFiveElement.innerHTML = `Wall Zone 5: +${adjustedWindForceZoneFivePositive.toFixed(2)}/${adjustedWindForceZoneFiveNegative.toFixed(2)}`;
+
+            console.log('Mean Height: ', meanHeight)
+            console.log(adjustedWindForceZoneOnePositive)
+            console.log(adjustedWindForceZoneTwoPositive)
+            console.log(adjustedWindForceZoneThreePositive)
+            console.log(adjustedWindForceZoneFourPositive)
+            console.log(adjustedWindForceZoneFivePositive)
+            console.log(adjustedWindForceZoneOneNegative)
+            console.log(adjustedWindForceZoneTwoNegative)
+            console.log(adjustedWindForceZoneThreeNegative)
+            console.log(adjustedWindForceZoneFourNegative)
+            console.log(adjustedWindForceZoneFiveNegative)
+        }
+    </script>
+</body>
+
+</html>
